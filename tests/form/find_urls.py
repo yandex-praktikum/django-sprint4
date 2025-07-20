@@ -22,21 +22,34 @@ def find_links_between_lines(
             ]
         )
     result_links = []
-    link_soup = BeautifulSoup(
-        page_content, features="html.parser", parse_only=SoupStrainer("a")
-    )
-    link: Tag
-    for link in link_soup:
-        if (
-            link.get("href")
-            and (
-                link.text in link_text_in
-                and link.get("href").startswith(urls_start_with)
-            )
-            and (link.sourceline >= start_lineix or start_lineix < 0)
-            and (link.sourceline <= end_lineix or end_lineix < 0)
-        ):
-            result_links.append(link)
+
+    parse_tags = SoupStrainer(["a", "form", "button"])
+    soup = BeautifulSoup(page_content, features="html.parser", parse_only=parse_tags)
+
+    for tag in soup:
+        if tag.name == "a":
+            href = tag.get("href")
+            if (
+                href
+                and "logout" not in href
+                and tag.text.strip() in link_text_in
+                and href.startswith(urls_start_with)
+                and (tag.sourceline >= start_lineix or start_lineix < 0)
+                and (tag.sourceline <= end_lineix or end_lineix < 0)
+            ):
+                result_links.append(tag)
+
+        elif tag.name == "form":
+            action = tag.get("action", "")
+            button = tag.find("button")
+            if (
+                button
+                and "logout" not in action
+                and action.startswith(urls_start_with)
+                and button.text.strip() in link_text_in
+            ):
+                result_links.append(tag)
+
     return result_links
 
 

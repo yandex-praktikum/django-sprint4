@@ -90,7 +90,14 @@ class BaseFormTester(BaseTester):
 
         soup = bs4.BeautifulSoup(response.content, features="html.parser")
 
-        form_tag = soup.find("form")
+        forms = soup.find_all("form")
+        form_tag = None
+        for f in forms:
+            action = f.get("action", "")
+            if "logout" not in action:
+                form_tag = f
+                break
+
         if not form_tag:
             raise FormTagMissingException()
 

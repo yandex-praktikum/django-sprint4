@@ -55,7 +55,19 @@ def find_edit_and_delete_urls(
         between_posts_end_lineix,
         link_text_in=text_between_posts,
     )
-    if len(set(link.get("href") for link in post_links)) != 2:
+
+    post_links = [
+        link for link in post_links
+        if "comment" not in (link.get("href") or link.get("action"))
+    ]
+
+    unique_links = set(
+        (link.get("href") or link.get("action"))
+        for link in post_links
+        if (link.get("href") or link.get("action"))
+    )
+
+    if len(unique_links) != 2:
         raise AssertionError(links_not_found_err_msg)
 
     # We have two links. Which one of them is the edit link,

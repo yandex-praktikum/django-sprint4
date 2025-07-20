@@ -230,9 +230,9 @@ def get_extra_urls(
     anothers_page_links = set(
         find_links_between_lines(base_content, **find_links_kwargs)
     )
-    diff_urls = [
-        x.get("href")
-        for x in (user_links - anothers_page_links)
-        if x.get("href") not in ignore_urls
-    ]
+    diff_urls = []
+    for x in (user_links - anothers_page_links):
+        url = x.get("href") or x.get("action")
+        if url and url not in ignore_urls:
+            diff_urls.append(url)
     return diff_urls
